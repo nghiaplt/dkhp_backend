@@ -13,21 +13,46 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use(bodyParser.json())
 
-app.get('/subject', (request, response) => {
-    //send JSON object
-    knex.select().from('subjects')
-        .then((result) => {
-            response.json({ success: true, data: result });
-        })
+
+
+
+
+app.get('/subjects', (req,res)=>{
+    knex.select().from('monhoc').then((monhoc)=>{
+        res.json({success:true,data:monhoc})
+    })
 })
 
-app.post('/subject', (request, response) => {
-    data = request.body;
-    //send JSON object
-    knex('subjects').insert(data)
-        .then(result => {
-            response.json({ success: true });
-        })
+app.get('/subjects/:id', (req, res)=>{
+    knex.select().from('monhoc').where({id:req.params.id}).then((r)=>{
+        res.json({success:true, data: r})
+    })
 })
+
+app.get('/subject/:id/registered-student',(req,res)=>{
+    knex('dangkidot1').join('sinhvien', 'dangkidot1.idSV','sinhvien.id').select().where({idMonHoc:req.params.id}).then((r)=>{
+        res.json({success:true, data:r})
+    })
+})
+
+app.get('/subject/:id/prerequisite-subjects', (req,res)=>{
+    knex('tienquyet').join('monhoc','tienquyet.idMonHocYeuCau','monhoc.id').select().where({idMonHoc:req.params.id}).then((r)=>{
+        res.json({success:true, data:r})
+    })
+})
+
+app.post('/subject/:id/register', (req, res) => {
+    knex('dangkidot1').insert({idMonHoc: req.params.id , idSV: req.headers.userid}).then(r => {
+        res.json({ success: true });
+    })
+})
+
+
+app.post('/subject/:id/register/cancel', (req, res) => {
+    knex('dangkidot1').where({idMonHoc: req.params.id , idSV: req.headers.userid}).del().then(r => {
+        res.json({ success: true });
+    })
+})
+
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
