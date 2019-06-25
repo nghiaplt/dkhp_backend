@@ -17,40 +17,40 @@ app.use(bodyParser.json())
 
 
 
-app.get('/subjects', (req,res)=>{
+app.get('/subjects', (request,response)=>{
     knex.select().from('monhoc').then((monhoc)=>{
-        res.json({success:true,data:monhoc})
+        response.json({success:true,data:monhoc})
     })
 })
 
-app.get('/subjects/:id', (req, res)=>{
-    knex.select().from('monhoc').where({id:req.params.id}).then((r)=>{
-        res.json({success:true, data: r})
+app.get('/subject/:id', (request, response)=>{
+    knex.select().from('monhoc').where({id:request.params.id}).then((r)=>{
+        response.json({success:true, data: r})
     })
 })
 
-app.get('/subject/:id/registered-student',(req,res)=>{
-    knex('dangkidot1').join('sinhvien', 'dangkidot1.idSV','sinhvien.id').select().where({idMonHoc:req.params.id}).then((r)=>{
-        res.json({success:true, data:r})
+app.get('/subject/:id/registered-student',(request,response)=>{
+    knex('dangkidot1').join('sinhvien', 'dangkidot1.idSV','sinhvien.id').select().where({idMonHoc:request.params.id}).then((r)=>{
+        response.json({success:true, data:r})
     })
 })
 
-app.get('/subject/:id/prerequisite-subjects', (req,res)=>{
-    knex('tienquyet').join('monhoc','tienquyet.idMonHocYeuCau','monhoc.id').select().where({idMonHoc:req.params.id}).then((r)=>{
-        res.json({success:true, data:r})
+app.get('/subject/:id/prerequisite-subjects', (request,response)=>{
+    knex('tienquyet').join('monhoc','tienquyet.idMonHocYeuCau','monhoc.id').select().where({idMonHoc:request.params.id}).then((r)=>{
+        response.json({success:true, data:r})
     })
 })
 
-app.post('/subject/:id/register', (req, res) => {
-    knex('dangkidot1').insert({idMonHoc: req.params.id , idSV: req.headers.userid}).then(r => {
-        res.json({ success: true });
+app.post('/subject/:id/register', (request, response) => {
+    knex('dangkidot1').insert({idMonHoc: request.params.id , idSV: request.headers.userid}).then(r => {
+        response.json({ success: true });
     })
 })
 
 
-app.post('/subject/:id/register/cancel', (req, res) => {
-    knex('dangkidot1').where({idMonHoc: req.params.id , idSV: req.headers.userid}).del().then(r => {
-        res.json({ success: true });
+app.post('/subject/:id/register/cancel', (request, response) => {
+    knex('dangkidot1').where({idMonHoc: request.params.id , idSV: request.headers.userid}).del().then(r => {
+        response.json({ success: true });
     })
 })
 
