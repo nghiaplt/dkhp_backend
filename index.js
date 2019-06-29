@@ -30,6 +30,20 @@ app.get('/subject/:id', (request, response)=>{
         response.send({success:true, data: r})
     })
 })
+app.get('/students',(request, response)=>{
+    knex('sinhvien').select()
+    .then((a)=>{
+        response.json({success:true, data:a})
+    })
+})
+app.get('/student/:id', (request, response)=>{
+    knex.select('').from('sinhvien').where({id:request.params.id})
+    .join('khoa','sinhvien.id','khoa.idk')
+    .then((r)=>{
+        response.send({success:true, data: r})
+    })
+})
+
 
 app.get('/subject/:id/registered-student',(request,response)=>{
     knex('dangkidot1').join('sinhvien', 'dangkidot1.idSV','sinhvien.id').select().where({idMonHoc:request.params.id}).then((r)=>{
@@ -91,6 +105,8 @@ app.get('/test',(request, response)=>{
     
     
 });
+
+
 
 
 app.get('/subjects/available/phase1',(request, response)=>{
