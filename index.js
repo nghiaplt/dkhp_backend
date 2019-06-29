@@ -43,33 +43,53 @@ app.get('/subject/:id/prerequisite-subjects', (request,response)=>{
     })
 })
 
-app.post('/subject/:id/register', (request, response) => {
-    knex('dangkidot1').insert({idMonHoc: request.params.id , idSV: request.headers.authorization}).then(r => {
-        response.json({ success: true });
+app.post('/subject/:id/register/phase1', (request, response) => {
+    
+    knex('sotinchichophep').select('soTinChi').where({idSV: request.headers.authorization})
+    .then(a=>{
+        knex('monhoc').select('soTinChi').where({id:request.params.id})
+        .then(b=>{
+            if(a[0].soTinChi >= b[0].soTinChi){
+                knex('dangkidot1').insert({idMonHoc: request.params.id , idSV: request.headers.authorization})
+                .then(() => {
+                    knex('sotinchichophep').where({idSV: request.headers.authorization})
+                    .update({soTinChi: a[0].soTinChi - b[0].soTinChi})
+                    .then(()=>{
+                        response.json({ success: true });
+                    })
+                })
+            }
+            else response.json({success:false});
+        }) 
     })
 })
 
 
 app.post('/subject/:id/register/cancel', (request, response) => {
-    knex('dangkidot1').where({idMonHoc: request.params.id , idSV: request.headers.authorization}).del().then(r => {
-        response.json({ success: true });
+    
+    
+
+    knex('sotinchichophep').select('soTinChi').where({idSV: request.headers.authorization})
+    .then(a=>{
+        knex('monhoc').select('soTinChi').where({id:request.params.id})
+        .then(b=>{
+            knex('dangkidot1').where({idMonHoc: request.params.id , idSV: request.headers.authorization}).del()
+            .then(() => {
+                knex('sotinchichophep').where({idSV: request.headers.authorization})
+                .update({soTinChi: a[0].soTinChi + b[0].soTinChi})
+                .then(()=>{
+                    response.json({ success: true });
+                })
+            })
+        }) 
     })
 })
 
 
-// lay ds cac mon co the dki: mon chua co diem va tien quyet cua mon do co diem
-app.get('/test',(req, res)=>{
-    // lay hp (co hp tien quyet) ma chua hoc hoc phan tien quyet 
 
-    knex('monhoc').select().innerJoin('tienquyet','monhoc.id','tienquyet.idMonSau').whereNotIn('id',
-
-    // lay hp (co hp tien quyet) ma da hoc hoc phan tien quyet
-    knex('monhoc').select('id').whereIn('id',
-    knex.select('idMonSau').from('tienquyet').innerJoin('diem', 'tienquyet.idMonTruoc','diem.idMonHoc')
-    .where({idSV: req.headers.authorization})))
-    .then(r=>{
-        res.json({ success: true , data: r})
-    })
+app.get('/test',(request, response)=>{
+    
+    
 });
 
 
