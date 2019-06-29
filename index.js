@@ -24,8 +24,10 @@ app.get('/subjects', (request,response)=>{
 })
 
 app.get('/subject/:id', (request, response)=>{
-    knex.select().from('monhoc').where({id:request.params.id}).then((r)=>{
-        response.json({success:true, data: r})
+    knex.select().from('monhoc').where({id:request.params.id})
+    .join('giaovien','monhoc.idGV','giaovien.idGv')
+    .then((r)=>{
+        response.send({success:true, data: r})
     })
 })
 
@@ -66,7 +68,7 @@ app.get('/test',(req, res)=>{
     knex.select('idMonSau').from('tienquyet').innerJoin('diem', 'tienquyet.idMonTruoc','diem.idMonHoc')
     .where({idSV: req.headers.authorization})))
     .then(r=>{
-        res.json(r)
+        res.json({ success: true , data: r})
     })
 });
 
@@ -86,7 +88,7 @@ app.get('/subjects/available/phase1',(request, response)=>{
         .where({idSV: request.headers.authorization})))
 
         ).then(t=>{
-            response.json(t)
+            response.json({ success: true , data: t})
         })
         
  
