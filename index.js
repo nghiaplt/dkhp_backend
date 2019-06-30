@@ -54,11 +54,11 @@ app.post('/subject/:id/register/phase1', (request, response) => {
                                     .where({ idSV: request.headers.authorization })
                                     .update({ soTinChi: a[0].soTinChi - b[0].soTinChi })
                                     .then(() => {
-                                        response.json({ success: true });
+                                        response.json({ success: true, data: { soTinChi: a[0].soTinChi - b[0].soTinChi } });
                                     })
                             })
                     }
-                    else response.json({ success: false, message: "Bạn không đủ tín chỉ để đăng kí môn học này." });
+                    else response.json({ success: false, message: "Bạn không đủ tín chỉ để đăng kí môn học này.", data: { soTinChi: a[0].soTinChi } });
                 })
         })
 })
@@ -86,11 +86,11 @@ app.post('/subject/:id/register/phase2', (request, response) => {
                                                     .where({ idSV: request.headers.authorization })
                                                     .update({ soTinChi: a[0].soTinChi - b[0].soTinChi })
                                                     .then(() => {
-                                                        response.json({ success: true });
+                                                        response.json({ success: true, data: { soTinChi: a[0].soTinChi - b[0].soTinChi } });
                                                     })
                                             })
                                     }
-                                    else response.json({ success: false, message: "Bạn không đủ tín chỉ để đăng kí môn học này." });
+                                    else response.json({ success: false, message: "Bạn không đủ tín chỉ để đăng kí môn học này.", data: { soTinChi: a[0].soTinChi } });
                                 })
                         })
                 }
@@ -325,8 +325,6 @@ app.post('/move/phase2', (request, response) => {
                 })
             })
         })
-
-
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
