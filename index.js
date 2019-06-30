@@ -56,7 +56,7 @@ app.post('/subject/:id/register/phase1', (request, response) => {
 })
 
 app.post('/subject/:id/register/phase2', (request, response) => {
-
+    
 })
 
 app.get('/subjects/registered/phase1', (request, response) => {
@@ -164,7 +164,49 @@ app.get('/roadmap', (request, response) => {
 });
 
 app.post('/move/phase2', (request, response) => {
+    // knex('dangkidot1').select('idMonHoc')
+    knex('dangkidot1').select('idMonHoc').groupBy('idMonHoc').then(ls=>{
+        ls.forEach(l=>{
+            getLimit(l.idMonHoc , limit_=>{
+                knex.select('monhoc.id as idmonhoc','monhoc.ten as tenmonhoc', 'monhoc.soTinChi as stc','monhoc.soLuongSV as soluongsv','t3.idSV as idsv','t3.dtb')
+                .from('monhoc')
+                .join(
+        
+                knex.select('dangkidot1.idMonHoc','dangkidot1.idSV as idsv','t2.dtb')
+                .from('dangkidot1')
+                .join(
+        
+                //tinh diem trung binh
+                knex.select('t1.idSV',knex.raw('sum(diemt)/sum(soTinChi) as dtb'))
+                .from(function(){
+                    this.select('diem.idSV','diem.diem','monhoc.id as idmonhoc', 'monhoc.soTinChi',
+                    knex.raw('diem.diem * monhoc.soTinChi as diemt'))
+                    .from('monhoc').join('diem','monhoc.id','diem.idMonHoc').as('t1')
+                }).groupBy('t1.idSV').as('t2') ,
+        
+                't2.idSV','dangkidot1.idSV')
+                .where({idMonHoc: l.idMonHoc})
+                .as('t3')
+                // end tinh dtb
+        
+        
+                , 'monhoc.id','t3.idMonHoc')
+                .limit(limit_[0].soLuongSV)
+                .orderBy('dtb','desc')
+        
+                .then(xs=>{
+                    xs.forEach(x=>{
+                        knex('dangkidot2').insert({ idMonHoc: x.idmonhoc, idSV: x.idsv })
+                        .then(()=>{
+                            response.json({success:true})
+                        })
+                    })
+                })
+            })
+        })
+    })
 
+    
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
@@ -175,14 +217,51 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 
 
+function getLimit(idmh_ ,callback){
+    knex('monhoc').select('soLuongSV').where({id:idmh_}).then(x=>{
+        callback(x)
+    })
+}
 
 
+app.get('/test', (request, response) => {
+        knex('dangkidot1').select('idMonHoc').groupBy('idMonHoc').then((x)=>response.json(x))
 
-// app.get('/subjects', (request, response) => {
-//     knex.select().from('monhoc').then((monhoc) => {
-//         response.json({ success: true, data: monhoc })
-//     })
-// })
+    // // move phase 1 sang phase 2 nhung mon co id la 1
+    // getLimit(1,limit_=>{
+    //     knex.select('monhoc.id as idmonhoc','monhoc.ten as tenmonhoc', 'monhoc.soTinChi as stc','monhoc.soLuongSV as soluongsv','t3.idSV as idsv','t3.dtb')
+    //     .from('monhoc')
+    //     .join(
+
+    //     knex.select('dangkidot1.idMonHoc','dangkidot1.idSV as idsv','t2.dtb')
+    //     .from('dangkidot1')
+    //     .join(
+
+    //     //tinh diem trung binh
+    //     knex.select('t1.idSV',knex.raw('sum(diemt)/sum(soTinChi) as dtb'))
+    //     .from(function(){
+    //         this.select('diem.idSV','diem.diem','monhoc.id as idmonhoc', 'monhoc.soTinChi',
+    //         knex.raw('diem.diem * monhoc.soTinChi as diemt'))
+    //         .from('monhoc').join('diem','monhoc.id','diem.idMonHoc').as('t1')
+    //     }).groupBy('t1.idSV').as('t2') ,
+
+    //     't2.idSV','dangkidot1.idSV')
+    //     .where({idMonHoc:1})
+    //     .as('t3')
+
+    //     , 'monhoc.id','t3.idMonHoc')
+    //     .limit(limit_[0].soLuongSV)
+    //     .orderBy('dtb','desc')
+
+    //     .then(xs=>{
+    //         xs.forEach(x=>{
+    //             console.log(x)
+    //         })
+            
+    //         response.json(xs);
+    //     })
+    // })
+})
 
 // app.get('/subject/:id', (request, response) => {
 //     knex.select().from('monhoc').where({ id: request.params.id })
