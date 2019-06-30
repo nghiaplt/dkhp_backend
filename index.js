@@ -3,6 +3,7 @@ const dbConfig = require('./configs/db')
 const bodyParser = require('body-parser')
 var cors = require('cors')
 var knex = require('knex')(dbConfig);
+var _ = require('lodash');
 
 const app = express()
 const port = 8222
@@ -121,6 +122,44 @@ app.get('/subjects/available/phase2', (request, response) => {
 })
 
 app.get('/roadmap', (request, response) => {
+    knex('tienquyet as tq')
+        .select(
+            'mh2.ten as monChinh',
+            'mh1.ten as tienQuyet',
+            'mh2.id as idSau',
+            'mh1.id as idTruoc'
+        )
+        .innerJoin('monhoc as mh1', 'mh1.id', 'tq.idMonTruoc')
+        .innerJoin('monhoc as mh2', 'mh2.id', 'tq.idMonSau')
+        .then(result => {
+            const group = _.groupBy(result, 'idSau');
+            const arrayLv1 = _.map(group, (item, key) => {
+                return {
+                    id: key,
+                    tienquyet: (item).map(element => ({ id: element.idTruoc, ten: element.tienQuyet, tienquyet: [] })),
+                    ten: item[0].monChinh
+                }
+            })
+            knex('monhoc')
+                .select('id', 'ten')
+                .whereNotIn('id', knex('tienquyet').select('idMonTruoc'))
+                .then(arrayRoot => {
+                    const arrayNested = _.map(arrayLv1, item => {
+                        // console.log(item);
+                        item.tienquyet = _.map(item.tienquyet, tienquyet => {
+                            // console.log(tienquyet);
+                            newtienquyet = _.find(arrayLv1, itemlv1 => tienquyet.id == itemlv1.id);
+                            tienquyet = newtienquyet === undefined ? tienquyet : newtienquyet;
+                            return tienquyet;
+                        })
+                        return item;
+                    })
+                    const kq = _.map(arrayRoot, root => {
+                        return _.find(arrayNested, neseted => root.id == neseted.id);
+                    })
+                    response.json({ success: true, data: kq });
+                })
+        })
 
 });
 
