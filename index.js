@@ -19,21 +19,6 @@ app.use(bodyParser.json())
 
 
 
-
-
-app.get('/subjects', (request, response) => {
-    knex.select().from('monhoc').then((monhoc) => {
-        response.json({ success: true, data: monhoc })
-    })
-})
-
-app.get('/subject/:id', (request, response) => {
-    knex.select().from('monhoc').where({ id: request.params.id })
-        .join('giaovien', 'monhoc.idGV', 'giaovien.idGv')
-        .then((r) => {
-            response.send({ success: true, data: r })
-        })
-})
 app.get('/students', (request, response) => {
     knex('sinhvien').select()
         .then((a) => {
@@ -46,19 +31,6 @@ app.get('/student/:id', (request, response) => {
         .then((r) => {
             response.send({ success: true, data: r })
         })
-})
-
-
-app.get('/subject/:id/registered-student', (request, response) => {
-    knex('dangkidot1').join('sinhvien', 'dangkidot1.idSV', 'sinhvien.id').select().where({ idMonHoc: request.params.id }).then((r) => {
-        response.json({ success: true, data: r })
-    })
-})
-
-app.get('/subject/:id/prerequisite-subjects', (request, response) => {
-    knex('tienquyet').join('monhoc', 'tienquyet.idMonTruoc', 'monhoc.id').select().where({ idMonSau: request.params.id }).then((r) => {
-        response.json({ success: true, data: r })
-    })
 })
 
 app.post('/subject/:id/register/phase1', (request, response) => {
@@ -82,11 +54,28 @@ app.post('/subject/:id/register/phase1', (request, response) => {
         })
 })
 
+app.post('/subject/:id/register/phase2', (request, response) => {
 
-app.post('/subject/:id/register/cancel', (request, response) => {
+})
+
+app.get('/subjects/registered/phase1', (request, response) => {
+    let user_id = request.headers.authorization;
+    knex('dangkidot1').select().where({ idSV: user_id })
+        .then(result => {
+            response.json({ success: true, data: result })
+        })
+})
+
+app.get('/subjects/registered/phase2', (request, response) => {
+    let user_id = request.headers.authorization;
+    knex('dangkidot1').select().where({ idSV: user_id })
+        .then(result => {
+            response.json({ success: true, data: result })
+        })
+})
 
 
-
+app.post('/subject/:id/register/cancel/phase1', (request, response) => {
     knex('sotinchichophep').select('soTinChi').where({ idSV: request.headers.authorization })
         .then(a => {
             knex('monhoc').select('soTinChi').where({ id: request.params.id })
@@ -102,14 +91,9 @@ app.post('/subject/:id/register/cancel', (request, response) => {
                 })
         })
 })
+app.post('/subject/:id/register/cancel/phase2', (request, response) => {
 
-
-
-app.get('/test', (request, response) => {
-
-
-});
-
+})
 
 
 
@@ -130,9 +114,53 @@ app.get('/subjects/available/phase1', (request, response) => {
         ).then(t => {
             response.json({ success: true, data: t })
         })
+})
 
+app.get('/subjects/available/phase2', (request, response) => {
 
 })
 
+app.get('/roadmap', (request, response) => {
+
+});
+
+app.post('/move/phase2', (request, response) => {
+
+})
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+
+
+
+
+
+
+
+
+
+// app.get('/subjects', (request, response) => {
+//     knex.select().from('monhoc').then((monhoc) => {
+//         response.json({ success: true, data: monhoc })
+//     })
+// })
+
+// app.get('/subject/:id', (request, response) => {
+//     knex.select().from('monhoc').where({ id: request.params.id })
+//         .join('giaovien', 'monhoc.idGV', 'giaovien.idGv')
+//         .then((r) => {
+//             response.send({ success: true, data: r })
+//         })
+// })
+
+// app.get('/subject/:id/registered-student', (request, response) => {
+//     knex('dangkidot1').join('sinhvien', 'dangkidot1.idSV', 'sinhvien.id').select().where({ idMonHoc: request.params.id }).then((r) => {
+//         response.json({ success: true, data: r })
+//     })
+// })
+
+// app.get('/subject/:id/prerequisite-subjects', (request, response) => {
+//     knex('tienquyet').join('monhoc', 'tienquyet.idMonTruoc', 'monhoc.id').select().where({ idMonSau: request.params.id }).then((r) => {
+//         response.json({ success: true, data: r })
+//     })
+// })
