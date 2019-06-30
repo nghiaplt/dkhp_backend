@@ -168,6 +168,7 @@ app.get('/subjects/available/phase2', (request, response) => {
         .count('dk2.id as soLuongSVDaDangKyDot1')
         .innerJoin('giaovien as gv', 'mh.idGV', 'gv.idGv')
         .leftJoin('dangkidot2 as dk2', 'dk2.idMonHoc', 'mh.id')
+        .groupBy('mh.id')
         .whereNotIn('mh.id', knex('diem')
             .select('idMonHoc')
             .where({ idSV: request.headers.authorization }))
