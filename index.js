@@ -68,7 +68,7 @@ app.get('/subjects/registered/phase1', (request, response) => {
 
 app.get('/subjects/registered/phase2', (request, response) => {
     let user_id = request.headers.authorization;
-    knex('dangkidot1').select().where({ idSV: user_id })
+    knex('dangkidot2').select().where({ idSV: user_id })
         .then(result => {
             response.json({ success: true, data: result })
         })
