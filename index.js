@@ -56,7 +56,7 @@ app.post('/subject/:id/register/phase1', (request, response) => {
 })
 
 app.post('/subject/:id/register/phase2', (request, response) => {
-    
+
 })
 
 app.get('/subjects/registered/phase1', (request, response) => {
@@ -100,11 +100,17 @@ app.post('/subject/:id/register/cancel/phase2', (request, response) => {
 
 app.get('/subjects/available/phase1', (request, response) => {
     //lay hp chua co diem
-    knex('monhoc').select().whereNotIn('id', knex('diem').select('idMonHoc')
-        .where({ idSV: request.headers.authorization })).whereNotIn('id',
-
+    knex('monhoc as mh')
+        .select('*', 'mh.ten as tenMH', 'gv.ten as tenGV')
+        .count('mh.id as soLuongSVDaDangKyDot1')
+        .innerJoin('giaovien as gv', 'mh.idGV', 'gv.idGv')
+        .innerJoin('dangkidot1 as dk1', 'dk1.idMonHoc', 'mh.id')
+        .groupBy('mh.id')
+        .whereNotIn('mh.id', knex('diem')
+            .select('idMonHoc')
+            .where({ idSV: request.headers.authorization }))
+        .whereNotIn('mh.id',
             // lay hp (co hp tien quyet) ma chua hoc hoc phan tien quyet
-
             knex('monhoc').select('id').innerJoin('tienquyet', 'monhoc.id', 'tienquyet.idMonSau').whereNotIn('id',
 
                 // lay hp (co hp tien quyet) ma da hoc hoc phan tien quyet
@@ -165,48 +171,48 @@ app.get('/roadmap', (request, response) => {
 
 app.post('/move/phase2', (request, response) => {
     // knex('dangkidot1').select('idMonHoc')
-    knex('dangkidot1').select('idMonHoc').groupBy('idMonHoc').then(ls=>{
-        ls.forEach(l=>{
-            getLimit(l.idMonHoc , limit_=>{
-                knex.select('monhoc.id as idmonhoc','monhoc.ten as tenmonhoc', 'monhoc.soTinChi as stc','monhoc.soLuongSV as soluongsv','t3.idSV as idsv','t3.dtb')
-                .from('monhoc')
-                .join(
-        
-                knex.select('dangkidot1.idMonHoc','dangkidot1.idSV as idsv','t2.dtb')
-                .from('dangkidot1')
-                .join(
-        
-                //tinh diem trung binh
-                knex.select('t1.idSV',knex.raw('sum(diemt)/sum(soTinChi) as dtb'))
-                .from(function(){
-                    this.select('diem.idSV','diem.diem','monhoc.id as idmonhoc', 'monhoc.soTinChi',
-                    knex.raw('diem.diem * monhoc.soTinChi as diemt'))
-                    .from('monhoc').join('diem','monhoc.id','diem.idMonHoc').as('t1')
-                }).groupBy('t1.idSV').as('t2') ,
-        
-                't2.idSV','dangkidot1.idSV')
-                .where({idMonHoc: l.idMonHoc})
-                .as('t3')
-                // end tinh dtb
-        
-        
-                , 'monhoc.id','t3.idMonHoc')
-                .limit(limit_[0].soLuongSV)
-                .orderBy('dtb','desc')
-        
-                .then(xs=>{
-                    xs.forEach(x=>{
-                        knex('dangkidot2').insert({ idMonHoc: x.idmonhoc, idSV: x.idsv })
-                        .then(()=>{
-                            response.json({success:true})
+    knex('dangkidot1').select('idMonHoc').groupBy('idMonHoc').then(ls => {
+        ls.forEach(l => {
+            getLimit(l.idMonHoc, limit_ => {
+                knex.select('monhoc.id as idmonhoc', 'monhoc.ten as tenmonhoc', 'monhoc.soTinChi as stc', 'monhoc.soLuongSV as soluongsv', 't3.idSV as idsv', 't3.dtb')
+                    .from('monhoc')
+                    .join(
+
+                        knex.select('dangkidot1.idMonHoc', 'dangkidot1.idSV as idsv', 't2.dtb')
+                            .from('dangkidot1')
+                            .join(
+
+                                //tinh diem trung binh
+                                knex.select('t1.idSV', knex.raw('sum(diemt)/sum(soTinChi) as dtb'))
+                                    .from(function () {
+                                        this.select('diem.idSV', 'diem.diem', 'monhoc.id as idmonhoc', 'monhoc.soTinChi',
+                                            knex.raw('diem.diem * monhoc.soTinChi as diemt'))
+                                            .from('monhoc').join('diem', 'monhoc.id', 'diem.idMonHoc').as('t1')
+                                    }).groupBy('t1.idSV').as('t2'),
+
+                                't2.idSV', 'dangkidot1.idSV')
+                            .where({ idMonHoc: l.idMonHoc })
+                            .as('t3')
+                        // end tinh dtb
+
+
+                        , 'monhoc.id', 't3.idMonHoc')
+                    .limit(limit_[0].soLuongSV)
+                    .orderBy('dtb', 'desc')
+
+                    .then(xs => {
+                        xs.forEach(x => {
+                            knex('dangkidot2').insert({ idMonHoc: x.idmonhoc, idSV: x.idsv })
+                                .then(() => {
+                                    response.json({ success: true })
+                                })
                         })
                     })
-                })
             })
         })
     })
 
-    
+
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
@@ -217,15 +223,15 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 
 
-function getLimit(idmh_ ,callback){
-    knex('monhoc').select('soLuongSV').where({id:idmh_}).then(x=>{
+function getLimit(idmh_, callback) {
+    knex('monhoc').select('soLuongSV').where({ id: idmh_ }).then(x => {
         callback(x)
     })
 }
 
 
 app.get('/test', (request, response) => {
-        knex('dangkidot1').select('idMonHoc').groupBy('idMonHoc').then((x)=>response.json(x))
+    knex('dangkidot1').select('idMonHoc').groupBy('idMonHoc').then((x) => response.json(x))
 
     // // move phase 1 sang phase 2 nhung mon co id la 1
     // getLimit(1,limit_=>{
@@ -257,7 +263,7 @@ app.get('/test', (request, response) => {
     //         xs.forEach(x=>{
     //             console.log(x)
     //         })
-            
+
     //         response.json(xs);
     //     })
     // })
