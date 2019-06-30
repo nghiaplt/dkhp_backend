@@ -7,7 +7,11 @@ var knex = require('knex')(dbConfig);
 const app = express()
 const port = 8222
 
-app.use(cors())
+var corsOptions = {
+    allowedHeaders: ['Content-Type', 'Authorization']
+}
+
+app.use(cors(corsOptions))
 
 app.use(bodyParser.urlencoded({ extended: false }))
 
