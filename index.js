@@ -35,7 +35,6 @@ app.get('/student/:id', (request, response) => {
 })
 
 app.post('/subject/:id/register/phase1', (request, response) => {
-
     knex('sotinchichophep').select('soTinChi').where({ idSV: request.headers.authorization })
         .then(a => {
             knex('monhoc').select('soTinChi').where({ id: request.params.id })
@@ -140,9 +139,9 @@ app.get('/subjects/available/phase1', (request, response) => {
     //lay hp chua co diem
     knex('monhoc as mh')
         .select('*', 'mh.ten as tenMH', 'gv.ten as tenGV', 'dk1.id as dk1id', 'mh.id as id')
-        .count('mh.id as soLuongSVDaDangKyDot1')
+        .count('dk1.id as soLuongSVDaDangKyDot1')
         .innerJoin('giaovien as gv', 'mh.idGV', 'gv.idGv')
-        .innerJoin('dangkidot1 as dk1', 'dk1.idMonHoc', 'mh.id')
+        .leftJoin('dangkidot1 as dk1', 'dk1.idMonHoc', 'mh.id')
         .groupBy('mh.id')
         .whereNotIn('mh.id', knex('diem')
             .select('idMonHoc')
@@ -161,13 +160,19 @@ app.get('/subjects/available/phase1', (request, response) => {
         })
 })
 
+
 app.get('/subjects/available/phase2', (request, response) => {
     //lay hp chua co diem
-    knex('monhoc').select().whereNotIn('id', knex('diem').select('idMonHoc')
-        .where({ idSV: request.headers.authorization })).whereNotIn('id',
-
+    knex('monhoc as mh')
+        .select('*', 'mh.ten as tenMH', 'gv.ten as tenGV', 'dk2.id as dk1id', 'mh.id as id')
+        .count('dk2.id as soLuongSVDaDangKyDot1')
+        .innerJoin('giaovien as gv', 'mh.idGV', 'gv.idGv')
+        .leftJoin('dangkidot2 as dk2', 'dk2.idMonHoc', 'mh.id')
+        .whereNotIn('mh.id', knex('diem')
+            .select('idMonHoc')
+            .where({ idSV: request.headers.authorization }))
+        .whereNotIn('mh.id',
             // lay hp (co hp tien quyet) ma chua hoc hoc phan tien quyet
-
             knex('monhoc').select('id').innerJoin('tienquyet', 'monhoc.id', 'tienquyet.idMonSau').whereNotIn('id',
 
                 // lay hp (co hp tien quyet) ma da hoc hoc phan tien quyet
@@ -176,9 +181,11 @@ app.get('/subjects/available/phase2', (request, response) => {
                         .where({ idSV: request.headers.authorization })))
 
         ).then(t => {
+            // console.log(t);
             response.json({ success: true, data: t })
         })
 })
+
 
 app.get('/roadmap', (request, response) => {
     knex('tienquyet as tq')
@@ -204,9 +211,7 @@ app.get('/roadmap', (request, response) => {
                 .whereNotIn('id', knex('tienquyet').select('idMonTruoc'))
                 .then(arrayRoot => {
                     const arrayNested = _.map(arrayLv1, item => {
-                        // console.log(item);
                         item.tienquyet = _.map(item.tienquyet, tienquyet => {
-                            // console.log(tienquyet);
                             newtienquyet = _.find(arrayLv1, itemlv1 => tienquyet.id == itemlv1.id);
                             tienquyet = newtienquyet === undefined ? tienquyet : newtienquyet;
                             return tienquyet;
