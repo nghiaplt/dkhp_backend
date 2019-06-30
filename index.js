@@ -101,7 +101,7 @@ app.post('/subject/:id/register/cancel/phase2', (request, response) => {
 app.get('/subjects/available/phase1', (request, response) => {
     //lay hp chua co diem
     knex('monhoc as mh')
-        .select('*', 'mh.ten as tenMH', 'gv.ten as tenGV')
+        .select('*', 'mh.ten as tenMH', 'gv.ten as tenGV', 'dk1.id as dk1id', 'mh.id as id')
         .count('mh.id as soLuongSVDaDangKyDot1')
         .innerJoin('giaovien as gv', 'mh.idGV', 'gv.idGv')
         .innerJoin('dangkidot1 as dk1', 'dk1.idMonHoc', 'mh.id')
