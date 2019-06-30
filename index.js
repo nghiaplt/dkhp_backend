@@ -50,36 +50,36 @@ app.post('/subject/:id/register/phase1', (request, response) => {
                                     })
                             })
                     }
-                    else response.json({ success: false , message: "Bạn không đủ tín chỉ để đăng kí môn học này." });
+                    else response.json({ success: false, message: "Bạn không đủ tín chỉ để đăng kí môn học này." });
                 })
         })
 })
 
 app.post('/subject/:id/register/phase2', (request, response) => {
-    getLimit(request.params.id,x=>{
-        knex('dangkidot2').select(knex.raw('count(*) as count')).where({idMonHoc:request.params.id})
-        .then(r=>{
-            if(x[0].soLuongSV-r[0].count>0){
-                knex('sotinchichophep').select('soTinChi').where({ idSV: request.headers.authorization })
-                .then(a=>{
-                    knex('monhoc').select('soTinChi').where({ id: request.params.id})
-                    .then(b=>{
-                        if (a[0].soTinChi >= b[0].soTinChi) {
-                            knex('dangkidot2').insert({ idMonHoc: request.params.id, idSV: request.headers.authorization })
-                            .then(() => {
-                                knex('sotinchichophep').where({ idSV: request.headers.authorization })
-                                    .update({ soTinChi: a[0].soTinChi - b[0].soTinChi })
-                                    .then(() => {
-                                        response.json({ success: true });
-                                    })
-                            })
-                        }
-                        else response.json({ success: false, message: "Bạn không đủ tín chỉ để đăng kí môn học này."});
-                    })
-                })
-            }
-            else response.json({success:false, message:"Môn học đã đủ số lượng sinh viên"});
-        })
+    getLimit(request.params.id, x => {
+        knex('dangkidot2').select(knex.raw('count(*) as count')).where({ idMonHoc: request.params.id })
+            .then(r => {
+                if (x[0].soLuongSV - r[0].count > 0) {
+                    knex('sotinchichophep').select('soTinChi').where({ idSV: request.headers.authorization })
+                        .then(a => {
+                            knex('monhoc').select('soTinChi').where({ id: request.params.id })
+                                .then(b => {
+                                    if (a[0].soTinChi >= b[0].soTinChi) {
+                                        knex('dangkidot2').insert({ idMonHoc: request.params.id, idSV: request.headers.authorization })
+                                            .then(() => {
+                                                knex('sotinchichophep').where({ idSV: request.headers.authorization })
+                                                    .update({ soTinChi: a[0].soTinChi - b[0].soTinChi })
+                                                    .then(() => {
+                                                        response.json({ success: true });
+                                                    })
+                                            })
+                                    }
+                                    else response.json({ success: false, message: "Bạn không đủ tín chỉ để đăng kí môn học này." });
+                                })
+                        })
+                }
+                else response.json({ success: false, message: "Môn học đã đủ số lượng sinh viên" });
+            })
     })
 
 })
@@ -164,20 +164,20 @@ app.get('/subjects/available/phase1', (request, response) => {
 app.get('/subjects/available/phase2', (request, response) => {
     //lay hp chua co diem
     knex('monhoc').select().whereNotIn('id', knex('diem').select('idMonHoc')
-    .where({ idSV: request.headers.authorization })).whereNotIn('id',
+        .where({ idSV: request.headers.authorization })).whereNotIn('id',
 
-        // lay hp (co hp tien quyet) ma chua hoc hoc phan tien quyet
+            // lay hp (co hp tien quyet) ma chua hoc hoc phan tien quyet
 
-        knex('monhoc').select('id').innerJoin('tienquyet', 'monhoc.id', 'tienquyet.idMonSau').whereNotIn('id',
+            knex('monhoc').select('id').innerJoin('tienquyet', 'monhoc.id', 'tienquyet.idMonSau').whereNotIn('id',
 
-            // lay hp (co hp tien quyet) ma da hoc hoc phan tien quyet
-            knex('monhoc').select('id').whereIn('id',
-                knex.select('idMonSau').from('tienquyet').innerJoin('diem', 'tienquyet.idMonTruoc', 'diem.idMonHoc')
-                    .where({ idSV: request.headers.authorization })))
+                // lay hp (co hp tien quyet) ma da hoc hoc phan tien quyet
+                knex('monhoc').select('id').whereIn('id',
+                    knex.select('idMonSau').from('tienquyet').innerJoin('diem', 'tienquyet.idMonTruoc', 'diem.idMonHoc')
+                        .where({ idSV: request.headers.authorization })))
 
-    ).then(t => {
-        response.json({ success: true, data: t })
-    })
+        ).then(t => {
+            response.json({ success: true, data: t })
+        })
 })
 
 app.get('/roadmap', (request, response) => {
