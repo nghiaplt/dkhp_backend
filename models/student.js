@@ -36,7 +36,7 @@ class StudentModel extends BaseModel {
     async getRootArray() {
         return await this.knex('monhoc')
             .select('id', 'ten')
-            .whereNotIn('id', knex('tienquyet')
+            .whereNotIn('id', this.knex('tienquyet')
                 .select('idMonTruoc'))
     }
 }

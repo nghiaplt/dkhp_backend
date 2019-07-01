@@ -1,5 +1,6 @@
 const BaseController = require("./base-controller");
 const StudentModel = require("../models/student");
+const _ = require('lodash');
 
 
 class StudentController extends BaseController {
@@ -40,7 +41,7 @@ class StudentController extends BaseController {
             const arrayRoot = await this.student.getRootArray();
             const arrayNested = _.map(arrayLv1, item => {
                 item.tienquyet = _.map(item.tienquyet, tienquyet => {
-                    newtienquyet = _.find(arrayLv1, itemlv1 => tienquyet.id == itemlv1.id);
+                    var newtienquyet = _.find(arrayLv1, itemlv1 => tienquyet.id == itemlv1.id);
                     tienquyet = newtienquyet === undefined ? tienquyet : newtienquyet;
                     return tienquyet;
                 })
@@ -53,6 +54,7 @@ class StudentController extends BaseController {
             this.sendSuccessResponse(kq);
         }
         catch ($e) {
+            console.log($e);
             this.sendFailResponse([]);
         }
     }

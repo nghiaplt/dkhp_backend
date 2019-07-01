@@ -72,6 +72,11 @@ class Subject extends BaseModel {
                                     .innerJoin('diem', 'tienquyet.idMonTruoc', 'diem.idMonHoc')
                                     .where({ idSV: studentId }))))
     }
+    async getLearntSubjects(studentId) {
+        return await this.knex('diem')
+            .select()
+            .where({ idSV: studentId });
+    }
 }
 
 module.exports = Subject;

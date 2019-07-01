@@ -55,6 +55,11 @@ class RegisterModel extends BaseModel {
             .select('idMonHoc')
             .groupBy('idMonHoc');
     }
+
+    async deleteRegisterPhase2() {
+        return await this.knex('dangkidot2')
+            .del();
+    }
 }
 
 module.exports = RegisterModel;

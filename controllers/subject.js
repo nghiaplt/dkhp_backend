@@ -105,13 +105,21 @@ class SubjectController extends BaseController {
             this.sendSuccessResponse(data);
         }
         catch ($e) {
-            console.log($e);
             this.sendFailResponse([]);
         }
     }
     async getListSubjectAvailablePhase2() {
         try {
             const data = await this.subject.getListSubjectAvailablePhase2(this.studentId);
+            this.sendSuccessResponse(data);
+        }
+        catch ($e) {
+            this.sendFailResponse([]);
+        }
+    }
+    async getLeartSubjects() {
+        try {
+            const data = await this.subject.getLearntSubjects(this.studentId);
             this.sendSuccessResponse(data);
         }
         catch ($e) {

@@ -26,6 +26,16 @@ class RegisterController extends BaseController {
             this.sendFailResponse([]);
         }
     }
+
+    async deleteRegisterPhase2() {
+        try {
+            await this.register.deleteRegisterPhase2();
+            this.sendSuccessResponse([]);
+        }
+        catch ($e) {
+            this.sendFailResponse([]);
+        }
+    }
 }
 
 module.exports = RegisterController;
